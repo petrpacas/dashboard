@@ -7,7 +7,7 @@ import App from './App'
 import router from './router'
 
 Vue.use(VueResource)
-Vue.use(GitHubAPI, { token: 'your access token' })
+Vue.use(GitHubAPI, { token: '.....' })
 
 /* eslint-disable no-new */
 new Vue({
@@ -16,5 +16,3 @@ new Vue({
   template: '<App/>',
   components: { App }
 })
-
-Vue.GitHubAPI.get('/projects', {}, [this.myGitHubData, 'projects'])
