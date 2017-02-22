@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Test from 'components/Test'
-import DoneWeekly from 'components/DoneWeekly'
+import Dashboard from 'components/Dashboard'
 
 Vue.use(Router)
 
@@ -9,8 +9,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'DoneWeekly',
-      component: DoneWeekly
+      name: 'Dashboard',
+      component: Dashboard
     },
     {
       path: '/test',
