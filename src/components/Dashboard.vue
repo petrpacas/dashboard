@@ -4,7 +4,7 @@
       <div class="panel panel-default">
         <div class="panel-heading">@{{ user.login }}</div>
         <div class="panel-body">
-          <p><img class="img-responsive" :src="user.avatar_url" alt="User's profile picture"></p>
+          <p><img class="img-responsive" :src="user.avatarUrl" alt="User's profile picture"></p>
         </div>
       </div>
     </div>
@@ -15,7 +15,7 @@
         <div class="panel-body">
         <p>List of open issues:</p>
         <ul>
-          <li v-for="issue in issues">{{ issue.title }}</li>
+          <li v-for="issue in issues">[{{ issue.number }}] <a :href="issue.htmlUrl" target="_blank">{{ issue.title }}</a></li>
         </ul>
         </div>
       </div>
@@ -27,25 +27,46 @@
 export default {
   data () {
     return {
-      myGitHubData: {}
+      userData: {},
+      issuesList: {}
     }
   },
   mounted: function () {
-    this.GitHubAPI.get('/user', {}, [this.myGitHubData, 'userData'])
-    this.GitHubAPI.get('/repos/enrian/sblending/issues', {}, [this.myGitHubData, 'sblendingIssues'])
+    var Octokat = require('octokat')
+    var octo = new Octokat({
+      token: 'xxx'
+      // put your own token here
+    })
+
+    octo.user.fetch((e, val) => {
+      this.userData = val
+    })
+
+    octo.repos('enrian', 'sblending').issues.fetchAll((e, val) => {
+      var allIssues = val
+      var trueIssues = {}
+
+      for (var i = 0; i < allIssues.length; i++) {
+        if (!allIssues[i].hasOwnProperty('pullRequest')) {
+          trueIssues[i] = allIssues[i]
+        }
+      }
+
+      this.issuesList = trueIssues
+    })
   },
   computed: {
     user: function () {
-      if (this.myGitHubData.userData) {
-        return this.myGitHubData.userData
+      if (this.userData) {
+        return this.userData
       }
-      return '...uh oh...'
+      return 'Uh-oh...'
     },
     issues: function () {
-      if (this.myGitHubData.sblendingIssues) {
-        return this.myGitHubData.sblendingIssues
+      if (this.issuesList) {
+        return this.issuesList
       }
-      return '...uh oh...'
+      return 'Uh-oh...'
     }
   }
 }
