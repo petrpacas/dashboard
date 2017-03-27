@@ -4,8 +4,13 @@
   <div class="panel-body">
     <p>Project columns:</p>
     <ul>
-      <li v-for="column in columns">
+      <li v-for="column in projectColumns">
         {{ column.name }}
+        <ul>
+          <li v-for="card in column.cardsList">
+            {{ card.id }}
+          </li>
+        </ul>
       </li>
     </ul>
   </div>
@@ -16,41 +21,29 @@
 export default {
   data () {
     return {
-      projectColumns: {
-        cardsList: {}
-      }
+      projectColumns: {}
     }
   },
   mounted: function () {
     var Octokat = require('octokat')
     var octo = new Octokat({
       // put your own token here
-      token: 'xxxxx',
+      token: 'xxx',
       acceptHeader: 'application/vnd.github.inertia-preview+json'
     })
 
-    // columns
+    var getCards = function (columns, columnsId, column) {
+      octo.fromUrl('/projects/columns/' + columnsId + '/cards').fetchAll((er, cards) => {
+        columns[column].cardsList = cards
+      })
+    }
+
     octo.fromUrl('/projects/85268/columns').fetchAll((e, cols) => {
       this.projectColumns = cols
-
       for (var col = 0; col < cols.length; col++) {
-        var id = this.projectColumns[col].id
-        octo.fromUrl('/projects/columns/' + id + '/cards').fetchAll((e2, cards) => {
-          this.projectColumns[col].cardsList = cards
-          // for (var card = 0; card < cards.length; card++) {
-          //   this.projectColumns[col].cardsList = cards[card]
-          // }
-        })
+        getCards(this.projectColumns, this.projectColumns[col].id, col)
       }
     })
-  },
-  computed: {
-    columns: function () {
-      if (this.projectColumns) {
-        return this.projectColumns
-      }
-      return 'Uh-oh...'
-    }
   }
 }
 </script>
