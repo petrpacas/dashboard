@@ -1,73 +1,49 @@
 <template>
-  <div class="row">
-    <div class="col-sm-3">
-      <div class="panel panel-default">
-        <div class="panel-heading">@{{ user.login }}</div>
-        <div class="panel-body">
-          <p><img class="img-responsive" :src="user.avatarUrl" alt="User's profile picture"></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-9">
-      <div class="panel panel-default">
-        <div class="panel-heading">SB Lending</div>
-        <div class="panel-body">
-        <p>List of open issues:</p>
+<div class="panel panel-default">
+  <div class="panel-heading">SB Lending</div>
+  <div class="panel-body">
+    <p>Project columns:</p>
+    <ul>
+      <li v-for="column in projectColumns">
+        {{ column.name }}
         <ul>
-          <li v-for="issue in issues">[{{ issue.number }}] <a :href="issue.htmlUrl" target="_blank">{{ issue.title }}</a></li>
+          <li v-for="card in column.cardsList">
+            {{ card.id }}
+          </li>
         </ul>
-        </div>
-      </div>
-    </div>
+      </li>
+    </ul>
   </div>
+</div>
 </template>
 
 <script>
 export default {
   data () {
     return {
-      userData: {},
-      issuesList: {}
+      projectColumns: {}
     }
   },
   mounted: function () {
     var Octokat = require('octokat')
     var octo = new Octokat({
-      token: 'xxx'
       // put your own token here
+      token: 'xxx',
+      acceptHeader: 'application/vnd.github.inertia-preview+json'
     })
 
-    octo.user.fetch((e, val) => {
-      this.userData = val
-    })
-
-    octo.repos('enrian', 'sblending').issues.fetchAll((e, val) => {
-      var allIssues = val
-      var trueIssues = {}
-
-      for (var i = 0; i < allIssues.length; i++) {
-        if (!allIssues[i].hasOwnProperty('pullRequest')) {
-          trueIssues[i] = allIssues[i]
-        }
-      }
-
-      this.issuesList = trueIssues
-    })
-  },
-  computed: {
-    user: function () {
-      if (this.userData) {
-        return this.userData
-      }
-      return 'Uh-oh...'
-    },
-    issues: function () {
-      if (this.issuesList) {
-        return this.issuesList
-      }
-      return 'Uh-oh...'
+    var getCards = function (columns, columnsId, column) {
+      octo.fromUrl('/projects/columns/' + columnsId + '/cards').fetchAll((er, cards) => {
+        columns[column].cardsList = cards
+      })
     }
+
+    octo.fromUrl('/projects/85268/columns').fetchAll((e, cols) => {
+      this.projectColumns = cols
+      for (var col = 0; col < cols.length; col++) {
+        getCards(this.projectColumns, this.projectColumns[col].id, col)
+      }
+    })
   }
 }
 </script>
