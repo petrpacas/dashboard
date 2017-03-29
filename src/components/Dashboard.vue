@@ -4,10 +4,12 @@
     <div class="panel-body">
       <ul class="columns">
         <li class="columns-item" v-for="column in projectColumns">
-          <h5>{{ column.name }}</h5>
-          <ul class="cards">
-            <li class="cards-item" v-for="card in column.cardsList">
-              {{ card.id }}
+          <h4>{{ column.name }}</h4>
+          <ul class="issues">
+            <li class="issues-item" v-for="card in column.cardsList">
+              {{ card.id }}:
+              <br>
+              <a v-bind:href="card.issue.htmlUrl" target="_blank">{{ card.issue.title }}</a>
             </li>
           </ul>
         </li>
@@ -25,12 +27,15 @@
     },
     methods: {
       getCards: function (toolkit, object, id, i) {
-        toolkit.fromUrl('/projects/columns/' + id + '/cards').fetchAll((e, value) => {
+        toolkit.fromUrl('/projects/columns/' + id + '/cards').fetchAll((e1, value) => {
           this.$set(object[i], 'cardsList', value)
+          for (var card = 0; card < object[i].cardsList.length; card++) {
+            this.getIssue(toolkit, object[i], card)
+          }
         })
       },
       getIssue: function (toolkit, object, i) {
-        toolkit.fromUrl(object.cardsList[i].contentUrl).fetchAll((e, value) => {
+        toolkit.fromUrl(object.cardsList[i].contentUrl).fetch((e2, value) => {
           this.$set(object.cardsList[i], 'issue', value)
         })
       }
@@ -47,9 +52,6 @@
         this.projectColumns = cols
         for (var col = 0; col < cols.length; col++) {
           this.getCards(octo, this.projectColumns, this.projectColumns[col].id, col, 'cards')
-          // for (var card = 0; card < this.projectColumns[col].cardsList.length; card++) {
-          //   this.getIssue(octo, this.projectColumns[col], card)
-          // }
         }
       })
     }
@@ -66,19 +68,25 @@
     padding: 0;
     margin: 0;
     &-item {
-      min-width: 200px;
-      max-width: 200px;
+      min-width: 300px;
+      max-width: 300px;
+      & + & {
+        margin-left: 20px;
+      }
     }
   }
 
-  .cards {
-    height: 50vh;
+  .issues {
+    height: calc(100vh - 250px);
     overflow-y: scroll;
     list-style: none;
-    padding: 0 0 0 20px;
+    padding: 10px;
     margin: 0;
+    background: #eee;
     &-item {
-      margin: 5px 0 0;
+      & + & {
+        margin: 20px 0 0;
+      }
     }
   }
 </style>
