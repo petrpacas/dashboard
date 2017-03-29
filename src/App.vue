@@ -15,8 +15,7 @@
 
         <div class="collapse navbar-collapse" id="navbar">
           <ul class="nav navbar-nav navbar-right">
-            <li><router-link to="/test">Test link</router-link></li>
-            <li><a><span class="glyphicon glyphicon-off"></span> Logout</a></li>
+            <li><router-link to="/test"><span class="glyphicon glyphicon-globe"></span> Test link</router-link></li>
           </ul>
         </div>
       </div>
