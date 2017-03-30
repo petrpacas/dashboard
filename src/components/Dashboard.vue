@@ -5,13 +5,16 @@
       <ul class="columns">
         <li class="columns-item" v-for="column in projectColumns">
           <h4>{{ column.name }}</h4>
-          <ul class="issues">
-            <li class="issues-item" v-for="card in column.cardsList">
+          <ul class="cards" v-if="shouldRenderCards(column)">
+            <li class="cards-item" v-for="card in column.cardsList">
               {{ card.id }}:
               <br>
-              <a v-bind:href="card.issue.htmlUrl" target="_blank">{{ card.issue.title }}</a>
+              <a v-if="canRenderIssue(card)" v-bind:href="card.issue.htmlUrl" target="_blank">
+                {{ card.issue.title }}
+              </a>
             </li>
           </ul>
+          <p v-if="!shouldRenderCards(column)">There are no cards in this column.</p>
         </li>
       </ul>
     </div>
@@ -25,6 +28,7 @@
         projectColumns: {}
       }
     },
+
     methods: {
       getCards: function (toolkit, object, id, i) {
         toolkit.fromUrl('/projects/columns/' + id + '/cards').fetchAll((e1, value) => {
@@ -34,12 +38,22 @@
           }
         })
       },
+
       getIssue: function (toolkit, object, i) {
         toolkit.fromUrl(object.cardsList[i].contentUrl).fetch((e2, value) => {
           this.$set(object.cardsList[i], 'issue', value)
         })
+      },
+
+      shouldRenderCards: function (column) {
+        return column.hasOwnProperty('cardsList')
+      },
+
+      canRenderIssue: function (card) {
+        return card.hasOwnProperty('issue')
       }
     },
+
     mounted: function () {
       var Octokat = require('octokat')
       var octo = new Octokat({
@@ -58,7 +72,7 @@
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .columns {
     width: 100%;
     overflow-x: scroll;
@@ -76,7 +90,7 @@
     }
   }
 
-  .issues {
+  .cards {
     height: calc(100vh - 250px);
     overflow-y: scroll;
     list-style: none;
